@@ -161,8 +161,8 @@ void receive(const Options& opt)
 {
   int sockfd = acceptOrDie(opt.port);
 
-  struct SessionMessage sessionMessage = { 0, 0 };
-  if (read_n(sockfd, &sessionMessage, sizeof(sessionMessage)) != sizeof(sessionMessage))
+  struct SessionMessage sessionMessage = { 0, 0 };//8个字节，一个是数字一个是长度
+  if (read_n(sockfd, &sessionMessage, sizeof(sessionMessage)) != sizeof(sessionMessage))//读完整的长度
   {
     perror("read SessionMessage");
     exit(1);
@@ -172,7 +172,7 @@ void receive(const Options& opt)
   sessionMessage.length = ntohl(sessionMessage.length);
   printf("receive number = %d\nreceive length = %d\n",
          sessionMessage.number, sessionMessage.length);
-  const int total_len = static_cast<int>(sizeof(int32_t) + sessionMessage.length);
+  const int total_len = static_cast<int>(sizeof(int32_t) + sessionMessage.length);//如果对方故意发很大的数字，则malloc很大的空间，会造成内网攻击，可加length长度限制
   PayloadMessage* payload = static_cast<PayloadMessage*>(::malloc(total_len));
   assert(payload);
 
